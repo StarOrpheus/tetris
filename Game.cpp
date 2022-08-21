@@ -2,6 +2,7 @@
 #include "TetrisWindow.h"
 
 #include <cassert>
+#include <numeric>
 #include <tuple>
 
 #include <QBrush>
@@ -197,37 +198,38 @@ void GameScene::draw(TetrisWindow *Window) {
         Cells[fromCartesian(X + dx, Y + dy)] = matchColor(CurrentFlyingType);
       }
 
-      unsigned FullLines = 0;
+      std::vector<bool> Filled(H, true);
       for (size_t I = 0; I < H; ++I) {
-        bool E = true;
         for (size_t J = 0; J < W; ++J) {
-          if (Cells[fromCartesian(H - 1 - I, J)] == CellColor::EmptyCell) {
-            E = false;
+          if (Cells[fromCartesian(I, J)] == CellColor::EmptyCell) {
+            Filled[I] = false;
             break;
           }
         }
-        if (E)
-          FullLines++;
-        else {
-          if (FullLines == 1)
-            Score += 100;
-          else if (FullLines == 2)
-            Score += 300;
-          else if (FullLines == 3)
-            Score += 500;
-          else if (FullLines == 4)
-            Score += 800;
-          else
-            Score += 3 * FullLines * 100;
-          break;
-        }
+      }
+      std::vector<CellColor> New(Cells.size(), CellColor::EmptyCell);
+      auto NextLine = H - 1;
+      for (size_t I = H; I > 0; I--) {
+        if (Filled[I - 1]) continue;
+        for (size_t J = 0; J < W; ++J)
+          New[fromCartesian(NextLine, J)] = Cells[fromCartesian(I - 1, J)];
+        NextLine--;
       }
 
+      std::swap(New, Cells);
+
+      unsigned FullLines = std::accumulate(Filled.begin(), Filled.end(), 0);
       if (FullLines) {
-        for (size_t I = Cells.size() - 1; I >= FullLines * W; --I)
-          Cells[I] = Cells[I - FullLines * W];
-        for (size_t I = FullLines * W; I > 0; --I)
-          Cells[I - 1] = CellColor::EmptyCell;
+        if (FullLines == 1)
+          Score += 100;
+        else if (FullLines == 2)
+          Score += 300;
+        else if (FullLines == 3)
+          Score += 500;
+        else if (FullLines == 4)
+          Score += 800;
+        else
+          Score += 3 * FullLines * 100;
       }
 
       updateFlying();
