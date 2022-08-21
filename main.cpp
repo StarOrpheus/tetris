@@ -1,4 +1,5 @@
 #include <QtWidgets/qapplication.h>
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <iostream>
@@ -6,12 +7,10 @@
 #include <tuple>
 #include <variant>
 #include <vector>
-#include <array>
 
 #include "TetrisWindow.h"
 
-
-int main(int Argc, char** Argv) {
+int main(int Argc, char **Argv) {
   QApplication App(Argc, Argv);
   TetrisWindow W;
   W.show();

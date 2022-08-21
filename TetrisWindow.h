@@ -1,22 +1,23 @@
 #pragma once
 
-#include <variant>
 #include <QMainWindow>
 #include <QTimer>
+#include <variant>
 
 #include "Game.h"
 
 class TetrisWindow : public QMainWindow {
   Q_OBJECT
 public:
+  explicit TetrisWindow(QWidget *Parent = nullptr);
 
-  explicit TetrisWindow(QWidget* Parent = nullptr);
+  void paintEvent(QPaintEvent *) override;
+  void keyPressEvent(QKeyEvent *) override;
 
-  void paintEvent(QPaintEvent*) override;
-  void keyPressEvent(QKeyEvent*) override;
+public Q_SLOTS:
+  void myUpdate() { update(); }
 
 private:
   std::variant<GameOverScene, GameScene> CurrentScene;
   QTimer UpdateTimer;
-  size_t Frames = 0;
 };

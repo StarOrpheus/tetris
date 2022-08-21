@@ -4,13 +4,12 @@
 #include <cassert>
 #include <tuple>
 
-#include <QPoint>
 #include <QBrush>
 #include <QColor>
-#include <QPen>
 #include <QPainter>
 #include <QPainterPath>
-
+#include <QPen>
+#include <QPoint>
 
 namespace {
 
@@ -41,48 +40,66 @@ getTetrominoCells(TetrominoType T, unsigned Rotations) {
   switch (T) {
   case TetrominoType::I:
     if (Rotations & 1)
-      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{0, 2}, std::pair{0, 3}};
+      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{0, 2},
+              std::pair{0, 3}};
     else
-      return {std::pair{0, 0}, std::pair{1, 0}, std::pair{2, 0}, std::pair{3, 0}};
+      return {std::pair{0, 0}, std::pair{1, 0}, std::pair{2, 0},
+              std::pair{3, 0}};
   case TetrominoType::J:
     if (Rotations == 0)
-      return {std::pair{0, 0}, std::pair{1, 0}, std::pair{1, 1}, std::pair{1, 2}};
+      return {std::pair{0, 0}, std::pair{1, 0}, std::pair{1, 1},
+              std::pair{1, 2}};
     else if (Rotations == 1)
-      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{1, 0}, std::pair{2, 0}};
+      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{1, 0},
+              std::pair{2, 0}};
     else if (Rotations == 2)
-      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{0, 2}, std::pair{1, 2}};
+      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{0, 2},
+              std::pair{1, 2}};
     else
-      return {std::pair{0, 1}, std::pair{1, 1}, std::pair{2, 1}, std::pair{2, 0}};
+      return {std::pair{0, 1}, std::pair{1, 1}, std::pair{2, 1},
+              std::pair{2, 0}};
   case TetrominoType::L:
     if (Rotations == 0)
-      return {std::pair{0, 2}, std::pair{1, 0}, std::pair{1, 1}, std::pair{1, 2}};
+      return {std::pair{0, 2}, std::pair{1, 0}, std::pair{1, 1},
+              std::pair{1, 2}};
     else if (Rotations == 1)
-      return {std::pair{0, 0}, std::pair{1, 0}, std::pair{2, 0}, std::pair{2, 1}};
+      return {std::pair{0, 0}, std::pair{1, 0}, std::pair{2, 0},
+              std::pair{2, 1}};
     else if (Rotations == 2)
-      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{0, 2}, std::pair{1, 0}};
+      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{0, 2},
+              std::pair{1, 0}};
     else
-      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{1, 1}, std::pair{2, 1}};
+      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{1, 1},
+              std::pair{2, 1}};
   case TetrominoType::O:
     return {std::pair{0, 0}, std::pair{0, 1}, std::pair{1, 0}, std::pair{1, 1}};
   case TetrominoType::S:
     if (Rotations & 1)
-      return {std::pair{0, 1}, std::pair{0, 2}, std::pair{1, 0}, std::pair{1, 1}};
+      return {std::pair{0, 1}, std::pair{0, 2}, std::pair{1, 0},
+              std::pair{1, 1}};
     else
-      return {std::pair{0, 0}, std::pair{1, 0}, std::pair{1, 1}, std::pair{2, 1}};
+      return {std::pair{0, 0}, std::pair{1, 0}, std::pair{1, 1},
+              std::pair{2, 1}};
   case TetrominoType::T:
     if (Rotations == 0)
-      return {std::pair{0, 1}, std::pair{1, 0}, std::pair{1, 1}, std::pair{1, 2}};
+      return {std::pair{0, 1}, std::pair{1, 0}, std::pair{1, 1},
+              std::pair{1, 2}};
     else if (Rotations == 1)
-      return {std::pair{0, 0}, std::pair{1, 0}, std::pair{1, 1}, std::pair{2, 0}};
+      return {std::pair{0, 0}, std::pair{1, 0}, std::pair{1, 1},
+              std::pair{2, 0}};
     else if (Rotations == 2)
-      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{0, 2}, std::pair{1, 1}};
+      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{0, 2},
+              std::pair{1, 1}};
     else
-      return {std::pair{0, 1}, std::pair{1, 0}, std::pair{1, 1}, std::pair{2, 1}};
+      return {std::pair{0, 1}, std::pair{1, 0}, std::pair{1, 1},
+              std::pair{2, 1}};
   case TetrominoType::Z:
     if (Rotations & 1)
-      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{1, 1}, std::pair{1, 2}};
+      return {std::pair{0, 0}, std::pair{0, 1}, std::pair{1, 1},
+              std::pair{1, 2}};
     else
-      return {std::pair{0, 1}, std::pair{1, 0}, std::pair{1, 1}, std::pair{2, 0}};
+      return {std::pair{0, 1}, std::pair{1, 0}, std::pair{1, 1},
+              std::pair{2, 0}};
   }
   assert(false);
   return {};
@@ -117,17 +134,19 @@ QColor getColor(CellColor C) {
 }
 } // namespace
 
-
-GameScene::GameScene() : Cells(W * H, CellColor::EmptyCell) { updateFlying(); }
+GameScene::GameScene(std::function<void(unsigned)> OnGameOver)
+    : Cells(W * H, CellColor::EmptyCell), OnGameOver(std::move(OnGameOver)) {
+  updateFlying();
+}
 
 void GameScene::updateFlying() {
   std::uniform_int_distribution TypeDistribution(
       static_cast<unsigned>(TetrominoType::I),
       static_cast<unsigned>(TetrominoType::Z));
 
-//  CurrentFlyingType = TetrominoType::I;
+  //  CurrentFlyingType = TetrominoType::I;
   CurrentFlyingType =
-    static_cast<TetrominoType>(TypeDistribution(getRandomDevice()));
+      static_cast<TetrominoType>(TypeDistribution(getRandomDevice()));
   CurrentFlyingTurns = 0;
   CurrentFlyingPos = fromCartesian(0, W / 2 - 1);
 }
@@ -149,7 +168,8 @@ CellColor GameScene::posColor(GameScene::Position P) {
     return Cells[P];
   auto [X, Y] = toCartesian(P);
   auto [FlyingX, FlyingY] = toCartesian(CurrentFlyingPos);
-  for (auto&& [dx, dy] : getTetrominoCells(CurrentFlyingType, CurrentFlyingTurns)) {
+  for (auto &&[dx, dy] :
+       getTetrominoCells(CurrentFlyingType, CurrentFlyingTurns)) {
     if (X == FlyingX + dx && Y == FlyingY + dy)
       return matchColor(CurrentFlyingType);
   }
@@ -157,12 +177,64 @@ CellColor GameScene::posColor(GameScene::Position P) {
 }
 
 void GameScene::draw(TetrisWindow *Window) {
+  Frame++;
+
   QPainter P(Window);
   P.setRenderHint(QPainter::Antialiasing);
 
   unsigned CellSize = 20;
 
   std::pair<unsigned, unsigned> FrameSize(CellSize * W, CellSize * H);
+
+  if (Frame % 6 == 0) {
+    auto Old = CurrentFlyingPos;
+    CurrentFlyingPos += W; // ++x
+    if (!flyingFit() || collide()) {
+      CurrentFlyingPos = Old;
+      auto [X, Y] = toCartesian(CurrentFlyingPos);
+      for (auto &&[dx, dy] :
+           getTetrominoCells(CurrentFlyingType, CurrentFlyingTurns)) {
+        Cells[fromCartesian(X + dx, Y + dy)] = matchColor(CurrentFlyingType);
+      }
+
+      unsigned FullLines = 0;
+      for (size_t I = 0; I < H; ++I) {
+        bool E = true;
+        for (size_t J = 0; J < W; ++J) {
+          if (Cells[fromCartesian(H - 1 - I, J)] == CellColor::EmptyCell) {
+            E = false;
+            break;
+          }
+        }
+        if (E)
+          FullLines++;
+        else {
+          if (FullLines == 1)
+            Score += 100;
+          else if (FullLines == 2)
+            Score += 300;
+          else if (FullLines == 3)
+            Score += 500;
+          else if (FullLines == 4)
+            Score += 800;
+          else
+            Score += 3 * FullLines * 100;
+          break;
+        }
+      }
+
+      if (FullLines) {
+        for (size_t I = Cells.size() - 1; I >= FullLines * W; --I)
+          Cells[I] = Cells[I - FullLines * W];
+        for (size_t I = FullLines * W; I > 0; --I)
+          Cells[I - 1] = CellColor::EmptyCell;
+      }
+
+      updateFlying();
+      if (!flyingFit() || collide())
+        return OnGameOver(Score);
+    }
+  }
 
   for (Position I = 0; I < Cells.size(); ++I) {
     auto Color = getColor(posColor(I));
@@ -175,6 +247,10 @@ void GameScene::draw(TetrisWindow *Window) {
     P.fillPath(Path, Color);
     P.drawPath(Path);
   }
+
+  std::string ScoreString = "Score " + std::to_string(Score);
+  P.drawText(CellSize * (W + 3), CellSize * (H + 3),
+             QString(ScoreString.data()));
 }
 
 void GameScene::onKey(KeyPressed K) {
@@ -202,6 +278,8 @@ void GameScene::onKey(KeyPressed K) {
     break;
   case KeyPressed::Up:
     CurrentFlyingTurns++;
+    if (!flyingFit() || collide())
+      CurrentFlyingTurns--;
     break;
   }
 }
@@ -227,6 +305,10 @@ bool GameScene::flyingFit() {
   return true;
 }
 
-void GameOverScene::draw(TetrisWindow *W) {
- // TODO
+void GameOverScene::draw(TetrisWindow *Window) {
+  QPainter P(Window);
+  P.setRenderHint(QPainter::Antialiasing);
+
+  std::string ScoreString = "Score " + std::to_string(FinalScore);
+  P.drawText(100, 100, QString(ScoreString.data()));
 }

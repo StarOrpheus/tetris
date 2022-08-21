@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QtWidgets/qmainwindow.h>
 #include <cstdint>
 #include <random>
 #include <vector>
 #include <array>
+#include <functional>
 
 enum class CellColor : uint8_t {
   EmptyCell,
@@ -53,7 +53,7 @@ struct GameScene {
 
   using Position = unsigned;
 
-  GameScene();
+  GameScene(std::function<void(unsigned)> onGameOver);
 
   void updateFlying();
 
@@ -73,9 +73,12 @@ struct GameScene {
   unsigned Level = 1;
   std::vector<CellColor> Cells; //!< Current flying one is not included!
   TetrominoType CurrentFlyingType;
-  uint8_t CurrentFlyingTurns; // number of clock-wise turns
+  uint8_t CurrentFlyingTurns; //!< number of clock-wise turns
   Position CurrentFlyingPos;
   uint64_t Score = 0;
+  uint32_t Frame = 0;
+
+  std::function<void(unsigned)> OnGameOver;
 };
 
 struct GameOverScene {

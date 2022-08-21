@@ -6,38 +6,41 @@
 #include "Game.h"
 
 #include <QKeyEvent>
+#include <QTimer>
+#include <QWindow>
 
 #include <iostream>
-#include <qmainwindow.h>
+#include <qwindowdefs.h>
 
 TetrisWindow::TetrisWindow(QWidget *Parent)
-    : QMainWindow(Parent), CurrentScene(GameScene{}), UpdateTimer(this) {
+    : QMainWindow(Parent), CurrentScene(GameScene{[this](unsigned Score) {
+        CurrentScene.emplace<GameOverScene>(Score);
+      }}),
+      UpdateTimer(this) {
   setFixedSize(640, 480);
 
-  QObject::connect(&UpdateTimer, SIGNAL(timeout()), this, SLOT(QMainWindow::requestUpdate()));
+  connect(&UpdateTimer, &QTimer::timeout, this, &TetrisWindow::myUpdate);
 
-  UpdateTimer.start(50);
+  UpdateTimer.start(30);
 }
 
 void TetrisWindow::paintEvent(QPaintEvent *E) {
-  Frames++;
-  std::cerr << Frames << std::endl;
-  std::visit([this] (auto&& D) { D.draw(this); }, CurrentScene);
+  std::visit([this](auto &&D) { D.draw(this); }, CurrentScene);
 }
 
 void TetrisWindow::keyPressEvent(QKeyEvent *E) {
   switch (E->key()) {
   case Qt::Key_Left:
-    std::visit([] (auto&& D) { D.onKey(KeyPressed::Left); }, CurrentScene);
+    std::visit([](auto &&D) { D.onKey(KeyPressed::Left); }, CurrentScene);
     break;
   case Qt::Key_Right:
-    std::visit([] (auto&& D) { D.onKey(KeyPressed::Right); }, CurrentScene);
+    std::visit([](auto &&D) { D.onKey(KeyPressed::Right); }, CurrentScene);
     break;
   case Qt::Key_Down:
-    std::visit([] (auto&& D) { D.onKey(KeyPressed::Down); }, CurrentScene);
+    std::visit([](auto &&D) { D.onKey(KeyPressed::Down); }, CurrentScene);
     break;
   case Qt::Key_Up:
-    std::visit([] (auto&& D) { D.onKey(KeyPressed::Up); }, CurrentScene);
+    std::visit([](auto &&D) { D.onKey(KeyPressed::Up); }, CurrentScene);
     break;
   }
 }
