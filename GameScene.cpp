@@ -178,7 +178,6 @@ void GameScene::draw() {
   Frame++;
 
   // TODO: level-dependent speed
-  // TODO: instant falling on Down key
   if (Frame % 30 == 0) {
     auto Old = CurrentFlyingPos;
     CurrentFlyingPos += W; // ++x
