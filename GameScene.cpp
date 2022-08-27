@@ -381,8 +381,7 @@ GameScene::Position GameScene::hardDropPos() const {
   auto FlyingPos = CurrentFlyingPos;
   assert(!collide(FlyingPos));
   while (true) {
-    auto [X, Y] = toCartesian(FlyingPos);
-    Position NextPos = fromCartesian(X + 1, Y);
+    Position NextPos = FlyingPos + W;
     if (collide(NextPos))
       return FlyingPos;
     FlyingPos = NextPos;
