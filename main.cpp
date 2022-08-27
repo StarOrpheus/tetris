@@ -1,6 +1,4 @@
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#include "GraphicsIncludes.h"
 
 #include <fmt/format.h>
 
@@ -14,8 +12,6 @@
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
 #endif
-
-#include <GLFW/glfw3.h>
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) &&                                 \
     !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
@@ -136,6 +132,8 @@ int main(int, char **) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+    ImGui::SetWindowFontScale(2.0);
 
     constexpr ImGuiWindowFlags Flags =
         ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |

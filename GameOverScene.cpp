@@ -1,7 +1,6 @@
 #include "GameOverScene.h"
 
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
+#include "GraphicsIncludes.h"
 #include <fmt/format.h>
 
 void GameOverScene::draw() {
