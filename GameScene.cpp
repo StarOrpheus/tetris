@@ -151,13 +151,15 @@ void GameScene::updateFlying() {
   CurrentFlyingPos = fromCartesian(0, W / 2 - 1);
 }
 
-GameScene::Position GameScene::fromCartesian(unsigned int I, unsigned int J) {
+GameScene::Position GameScene::fromCartesian(unsigned int I,
+                                             unsigned int J) const {
   auto Result = I * W + J;
   assert(Result < W * H);
   return Result;
 }
 
-std::pair<unsigned, unsigned> GameScene::toCartesian(GameScene::Position P) {
+std::pair<unsigned, unsigned>
+GameScene::toCartesian(GameScene::Position P) const {
   auto I = P / W;
   auto J = P % W;
   return {I, J};
@@ -184,7 +186,7 @@ void GameScene::draw() {
   if (Frame % 30 == 0) {
     auto Old = CurrentFlyingPos;
     CurrentFlyingPos += W; // ++x
-    if (!flyingFit() || collide()) {
+    if (collide(CurrentFlyingPos)) {
       CurrentFlyingPos = Old;
       auto [X, Y] = toCartesian(CurrentFlyingPos);
       for (auto &&[dx, dy] :
@@ -230,10 +232,12 @@ void GameScene::draw() {
       }
 
       updateFlying();
-      if (!flyingFit() || collide())
+      if (collide(CurrentFlyingPos))
         return OnGameOver(Score);
     }
   }
+  assert(!collide(CurrentFlyingPos) &&
+         "All collisions expected to be fixed during physics stage");
 
   {
     ImGui::BeginChild("left pane", ImVec2(150, 0), /*border=*/true);
@@ -270,6 +274,7 @@ void GameScene::draw() {
       float X = StartPos.x;
       float Y = StartPos.y;
       ImDrawList *DrawList = ImGui::GetWindowDrawList();
+      auto HardDropPos = hardDropPos();
 
       for (size_t I = 0; I < H; ++I) {
         X = StartPos.x;
@@ -281,9 +286,21 @@ void GameScene::draw() {
 
         for (size_t J = 0; J < W; ++J) {
           CellColor CColor = posColor(fromCartesian(I, J));
+          bool OnShadowCell = false;
+          auto [ShadowX, ShadowY] = toCartesian(HardDropPos);
+          for (auto &&[dx, dy] :
+               getTetrominoCells(CurrentFlyingType, CurrentFlyingTurns)) {
+            if (I == ShadowX + dx && J == ShadowY + dy) {
+              OnShadowCell = true;
+              break;
+            }
+          }
+
+          if (OnShadowCell)
+            CColor = matchColor(CurrentFlyingType);
           auto Color = getColor(CColor);
 
-          if (CColor == CellColor::EmptyCell) {
+          if (CColor == CellColor::EmptyCell || OnShadowCell) {
             DrawList->AddRect(ImVec2(X, Y),
                               ImVec2(X + BlockSize, Y + BlockSize), Color,
                               Rounding, ImDrawFlags_None, 1.0f);
@@ -302,7 +319,8 @@ void GameScene::draw() {
 }
 
 void GameScene::onKey(int Key, int Action) {
-  assert(!collide());
+  assert(!collide(CurrentFlyingPos) &&
+         "No collision before key event expected");
 
   auto [X, Y] = toCartesian(CurrentFlyingPos);
   auto Old = CurrentFlyingPos;
@@ -313,41 +331,37 @@ void GameScene::onKey(int Key, int Action) {
   if (Key == GLFW_KEY_LEFT) {
     if (Y > 0) {
       CurrentFlyingPos = fromCartesian(X, Y - 1);
-      if (!flyingFit() || collide())
+      if (collide(CurrentFlyingPos))
         CurrentFlyingPos = Old;
     }
   } else if (Key == GLFW_KEY_RIGHT) {
     if (Y < W - 1) {
       CurrentFlyingPos = fromCartesian(X, Y + 1);
-      if (!flyingFit() || collide())
+      if (collide(CurrentFlyingPos))
         CurrentFlyingPos = Old;
     }
   } else if (Key == GLFW_KEY_UP) {
     CurrentFlyingTurns++;
-    if (!flyingFit() || collide())
+    if (collide(CurrentFlyingPos))
       CurrentFlyingTurns--;
+  } else if (Key == GLFW_KEY_DOWN) {
+    CurrentFlyingPos = hardDropPos();
   }
+
+  assert(!collide(CurrentFlyingPos) && "Pressed key cause collision");
 }
 
-bool GameScene::collide() {
-  auto [FlyingX, FlyingY] = toCartesian(CurrentFlyingPos);
+bool GameScene::collide(unsigned FlyingPos) const {
+  auto [FlyingX, FlyingY] = toCartesian(FlyingPos);
   for (auto &&[dx, dy] :
        getTetrominoCells(CurrentFlyingType, CurrentFlyingTurns)) {
+    if (FlyingX + dx >= H || FlyingY + dy >= W)
+      return true;
     auto P = fromCartesian(FlyingX + dx, FlyingY + dy);
     if (Cells[P] != CellColor::EmptyCell)
       return true;
   }
   return false;
-}
-
-bool GameScene::flyingFit() {
-  auto [X, Y] = toCartesian(CurrentFlyingPos);
-  for (auto &&[dx, dy] :
-       getTetrominoCells(CurrentFlyingType, CurrentFlyingTurns)) {
-    if (X + dx >= H || Y + dy >= W)
-      return false;
-  }
-  return true;
 }
 
 void GameScene::maybeLevelUp() {
@@ -360,4 +374,16 @@ void GameScene::maybeLevelUp() {
 unsigned GameScene::linesToLevelUp() const {
   return std::min(StartLevel * 10 + 10,
                   unsigned(std::max(100, int(StartLevel) * 10 - 50)));
+}
+
+GameScene::Position GameScene::hardDropPos() const {
+  auto FlyingPos = CurrentFlyingPos;
+  assert(!collide(FlyingPos));
+  while (true) {
+    auto [X, Y] = toCartesian(FlyingPos);
+    Position NextPos = fromCartesian(X + 1, Y);
+    if (collide(NextPos))
+      return FlyingPos;
+    FlyingPos = NextPos;
+  }
 }

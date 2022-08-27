@@ -7,6 +7,7 @@
 
 enum class CellColor : uint8_t {
   EmptyCell,
+
   // ####
   IColor,
 
@@ -48,9 +49,9 @@ struct GameScene {
 
   void updateFlying();
 
-  Position fromCartesian(unsigned I, unsigned J);
+  Position fromCartesian(unsigned I, unsigned J) const;
 
-  std::pair<unsigned, unsigned> toCartesian(Position P);
+  std::pair<unsigned, unsigned> toCartesian(Position P) const;
 
   CellColor posColor(Position P);
 
@@ -58,8 +59,9 @@ struct GameScene {
 
   void onKey(int Key, int Action);
 
-  bool collide();
-  bool flyingFit();
+  bool collide(unsigned FlyingPos) const;
+
+  Position hardDropPos() const;
 
   void maybeLevelUp();
   unsigned linesToLevelUp() const;
