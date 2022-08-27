@@ -292,15 +292,20 @@ void GameScene::draw() {
             }
           }
 
-          if (OnShadowCell)
-            CColor = matchColor(CurrentFlyingType);
           auto Color = getColor(CColor);
 
-          if (CColor != CellColor::EmptyCell && !OnShadowCell) {
+          if (CColor != CellColor::EmptyCell) {
             DrawList->AddRectFilled(ImVec2(X, Y),
                                     ImVec2(X + BlockSize, Y + BlockSize), Color,
                                     Rounding, ImDrawFlags_None);
+          } else if (OnShadowCell) {
+            CellColor C = matchColor(CurrentFlyingType);
+            Color = getColor(C);
+            DrawList->AddRect(ImVec2(X, Y),
+                              ImVec2(X + BlockSize, Y + BlockSize), Color,
+                              Rounding, ImDrawFlags_None, 3.0f);
           } else {
+            assert(CColor == CellColor::EmptyCell);
             DrawList->AddRect(ImVec2(X, Y),
                               ImVec2(X + BlockSize, Y + BlockSize), Color,
                               Rounding, ImDrawFlags_None, 1.0f);
