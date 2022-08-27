@@ -38,6 +38,7 @@ enum class TetrominoType : uint8_t { I, J, L, O, S, T, Z };
 struct GameScene {
   constexpr static unsigned W = 10;
   constexpr static unsigned H = 20;
+  constexpr static unsigned StartLevel = 0;
 
   using Position = unsigned;
 
@@ -58,12 +59,16 @@ struct GameScene {
   bool collide();
   bool flyingFit();
 
-  unsigned Level = 1;
+  void maybeLevelUp();
+  unsigned linesToLevelUp() const;
+
+  unsigned Level = StartLevel;
   std::vector<CellColor> Cells; //!< Current flying one is not included!
   TetrominoType CurrentFlyingType;
   uint8_t CurrentFlyingTurns; //!< number of clock-wise turns
   Position CurrentFlyingPos;
   uint64_t Score = 0;
+  uint32_t FullLinesOnCurLevel = 0;
   uint32_t Frame = 0;
 
   std::function<void(unsigned)> OnGameOver;

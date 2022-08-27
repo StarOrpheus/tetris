@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+
 #include <GLFW/glfw3.h>
 
 #include <cassert>
@@ -214,16 +215,18 @@ void GameScene::draw() {
 
       unsigned FullLines = std::accumulate(Filled.begin(), Filled.end(), 0);
       if (FullLines) {
+        FullLinesOnCurLevel += FullLines;
         if (FullLines == 1)
-          Score += 100;
+          Score += 40 * (Level + 1);
         else if (FullLines == 2)
-          Score += 300;
+          Score += 100 * (Level + 1);
         else if (FullLines == 3)
-          Score += 500;
+          Score += 300 * (Level + 1);
         else if (FullLines == 4)
-          Score += 800;
-        else
-          Score += 3 * FullLines * 100;
+          Score += 1200 * (Level + 1);
+        else {
+          assert(false && "Somehow more than 4 full lines detected!!");
+        }
       }
 
       updateFlying();
@@ -236,6 +239,7 @@ void GameScene::draw() {
     ImGui::BeginChild("left pane", ImVec2(150, 0), /*border=*/true);
     ImGui::Text("Score: %lu", Score);
     ImGui::Text("Level: %d", Level);
+    ImGui::Text("Lines: %d/%d", FullLinesOnCurLevel, linesToLevelUp());
     ImGui::Text("Time: %d", 0); // TODO: add time tracker
     ImGui::EndChild();
   }
@@ -344,4 +348,16 @@ bool GameScene::flyingFit() {
       return false;
   }
   return true;
+}
+
+void GameScene::maybeLevelUp() {
+  if (FullLinesOnCurLevel > linesToLevelUp()) {
+    Level++;
+    FullLinesOnCurLevel = 0;
+  }
+}
+
+unsigned GameScene::linesToLevelUp() const {
+  return std::min(StartLevel * 10 + 10,
+                  unsigned(std::max(100, int(StartLevel) * 10 - 50)));
 }
