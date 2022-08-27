@@ -1,9 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <random>
-#include <vector>
-#include <array>
 #include <functional>
 
 enum class CellColor : uint8_t {
@@ -38,22 +35,13 @@ enum class CellColor : uint8_t {
 
 enum class TetrominoType : uint8_t { I, J, L, O, S, T, Z };
 
-struct TetrisWindow;
-
-enum class KeyPressed {
-  Left,
-  Right,
-  Down,
-  Up
-};
-
 struct GameScene {
   constexpr static unsigned W = 10;
   constexpr static unsigned H = 20;
 
   using Position = unsigned;
 
-  GameScene(std::function<void(unsigned)> onGameOver);
+  GameScene(std::function<void(unsigned)> OnGameOver);
 
   void updateFlying();
 
@@ -63,9 +51,9 @@ struct GameScene {
 
   CellColor posColor(Position P);
 
-  void draw(TetrisWindow* W);
+  void draw();
 
-  void onKey(KeyPressed);
+  void onKey(int Key, int Action);
 
   bool collide();
   bool flyingFit();
@@ -79,15 +67,4 @@ struct GameScene {
   uint32_t Frame = 0;
 
   std::function<void(unsigned)> OnGameOver;
-};
-
-struct GameOverScene {
-
-  explicit GameOverScene(unsigned FinalScore) : FinalScore(FinalScore) {}
-
-  void draw(TetrisWindow* W);
-
-  void onKey(KeyPressed) {}
-
-  unsigned FinalScore;
 };

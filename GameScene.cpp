@@ -1,16 +1,14 @@
-#include "Game.h"
-#include "TetrisWindow.h"
+#include "GameScene.h"
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#include <GLFW/glfw3.h>
 
 #include <cassert>
 #include <numeric>
+#include <random>
 #include <tuple>
-
-#include <QBrush>
-#include <QColor>
-#include <QPainter>
-#include <QPainterPath>
-#include <QPen>
-#include <QPoint>
 
 namespace {
 
@@ -111,10 +109,10 @@ std::mt19937 &getRandomDevice() {
   return D;
 }
 
-QColor getColor(CellColor C) {
+ImColor getColor(CellColor C) {
   switch (C) {
   case CellColor::EmptyCell:
-    return {0, 0, 0};
+    return {255, 255, 255};
   case CellColor::IColor:
     return {135, 206, 235};
   case CellColor::JColor:
@@ -177,17 +175,12 @@ CellColor GameScene::posColor(GameScene::Position P) {
   return CellColor::EmptyCell;
 }
 
-void GameScene::draw(TetrisWindow *Window) {
+void GameScene::draw() {
   Frame++;
 
-  QPainter P(Window);
-  P.setRenderHint(QPainter::Antialiasing);
-
-  unsigned CellSize = 20;
-
-  std::pair<unsigned, unsigned> FrameSize(CellSize * W, CellSize * H);
-
-  if (Frame % 6 == 0) {
+  // TODO: level-dependent speed
+  // TODO: instant falling on Down key
+  if (Frame % 30 == 0) {
     auto Old = CurrentFlyingPos;
     CurrentFlyingPos += W; // ++x
     if (!flyingFit() || collide()) {
@@ -210,7 +203,8 @@ void GameScene::draw(TetrisWindow *Window) {
       std::vector<CellColor> New(Cells.size(), CellColor::EmptyCell);
       auto NextLine = H - 1;
       for (size_t I = H; I > 0; I--) {
-        if (Filled[I - 1]) continue;
+        if (Filled[I - 1])
+          continue;
         for (size_t J = 0; J < W; ++J)
           New[fromCartesian(NextLine, J)] = Cells[fromCartesian(I - 1, J)];
         NextLine--;
@@ -238,51 +232,96 @@ void GameScene::draw(TetrisWindow *Window) {
     }
   }
 
-  for (Position I = 0; I < Cells.size(); ++I) {
-    auto Color = getColor(posColor(I));
-    auto [X, Y] = toCartesian(I);
-    QRect Cell((Y + 1) * CellSize, (X + 1) * CellSize, CellSize, CellSize);
-    QPainterPath Path;
-    Path.addRoundedRect(Cell, 2, 2, Qt::AbsoluteSize);
-    QPen Pen(Qt::black, 2);
-    P.setPen(Pen);
-    P.fillPath(Path, Color);
-    P.drawPath(Path);
+  {
+    ImGui::BeginChild("left pane", ImVec2(150, 0), /*border=*/true);
+    ImGui::Text("Score: %lu", Score);
+    ImGui::Text("Level: %d", Level);
+    ImGui::Text("Time: %d", 0); // TODO: add time tracker
+    ImGui::EndChild();
   }
 
-  std::string ScoreString = "Score " + std::to_string(Score);
-  P.drawText(CellSize * (W + 3), CellSize * (H + 3),
-             QString(ScoreString.data()));
+  ImGui::SameLine();
+
+  {
+    if (ImGui::BeginChild("right pane", ImVec2(0, 0), /*border=*/true)) {
+      const auto WinSize = ImGui::GetWindowSize();
+      constexpr float Spacing = 1.0f;
+
+      auto StartPos = ImGui::GetCursorScreenPos();
+      const auto BlockSize =
+          std::min(WinSize.x / 10, WinSize.y / 20) - Spacing - 1;
+      const auto BlockSizeWithSpacing = BlockSize + Spacing;
+
+      const auto TopBottomMargin = (WinSize.y - BlockSizeWithSpacing * 20) / 2;
+      const auto LeftRightMargin = (WinSize.x - BlockSizeWithSpacing * 10) / 2;
+      const auto RowSize = BlockSizeWithSpacing;
+
+      StartPos.x += LeftRightMargin;
+      StartPos.y += TopBottomMargin;
+
+      const float Rounding = BlockSize / 5.0f;
+
+      // Как говорил мне мой дед:
+      // - Я твой дед.
+      float X = StartPos.x;
+      float Y = StartPos.y;
+      ImDrawList *DrawList = ImGui::GetWindowDrawList();
+
+      for (size_t I = 0; I < H; ++I) {
+        X = StartPos.x;
+        if (I != 0)
+          Y += BlockSize + Spacing;
+
+        char IdBuf[20];
+        sprintf(IdBuf, "right pane##%zu", I);
+
+        for (size_t J = 0; J < W; ++J) {
+          CellColor CColor = posColor(fromCartesian(I, J));
+          auto Color = getColor(CColor);
+
+          if (CColor == CellColor::EmptyCell) {
+            DrawList->AddRect(ImVec2(X, Y),
+                              ImVec2(X + BlockSize, Y + BlockSize), Color,
+                              Rounding, ImDrawFlags_None, 1.0f);
+          } else {
+            DrawList->AddRectFilled(ImVec2(X, Y),
+                                    ImVec2(X + BlockSize, Y + BlockSize), Color,
+                                    Rounding, ImDrawFlags_None);
+          }
+
+          X += BlockSize + Spacing;
+        }
+      }
+    }
+    ImGui::EndChild();
+  }
 }
 
-void GameScene::onKey(KeyPressed K) {
+void GameScene::onKey(int Key, int Action) {
   assert(!collide());
 
   auto [X, Y] = toCartesian(CurrentFlyingPos);
   auto Old = CurrentFlyingPos;
-  switch (K) {
-  case KeyPressed::Left:
+
+  if (Action != GLFW_PRESS)
+    return;
+
+  if (Key == GLFW_KEY_LEFT) {
     if (Y > 0) {
       CurrentFlyingPos = fromCartesian(X, Y - 1);
       if (!flyingFit() || collide())
         CurrentFlyingPos = Old;
     }
-    break;
-  case KeyPressed::Right:
+  } else if (Key == GLFW_KEY_RIGHT) {
     if (Y < W - 1) {
       CurrentFlyingPos = fromCartesian(X, Y + 1);
       if (!flyingFit() || collide())
         CurrentFlyingPos = Old;
     }
-    break;
-  case KeyPressed::Down:
-    // TODO
-    break;
-  case KeyPressed::Up:
+  } else if (Key == GLFW_KEY_UP) {
     CurrentFlyingTurns++;
     if (!flyingFit() || collide())
       CurrentFlyingTurns--;
-    break;
   }
 }
 
@@ -305,12 +344,4 @@ bool GameScene::flyingFit() {
       return false;
   }
   return true;
-}
-
-void GameOverScene::draw(TetrisWindow *Window) {
-  QPainter P(Window);
-  P.setRenderHint(QPainter::Antialiasing);
-
-  std::string ScoreString = "Score " + std::to_string(FinalScore);
-  P.drawText(100, 100, QString(ScoreString.data()));
 }
