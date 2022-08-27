@@ -300,14 +300,14 @@ void GameScene::draw() {
             CColor = matchColor(CurrentFlyingType);
           auto Color = getColor(CColor);
 
-          if (CColor == CellColor::EmptyCell || OnShadowCell) {
-            DrawList->AddRect(ImVec2(X, Y),
-                              ImVec2(X + BlockSize, Y + BlockSize), Color,
-                              Rounding, ImDrawFlags_None, 1.0f);
-          } else {
+          if (CColor != CellColor::EmptyCell && !OnShadowCell) {
             DrawList->AddRectFilled(ImVec2(X, Y),
                                     ImVec2(X + BlockSize, Y + BlockSize), Color,
                                     Rounding, ImDrawFlags_None);
+          } else {
+            DrawList->AddRect(ImVec2(X, Y),
+                              ImVec2(X + BlockSize, Y + BlockSize), Color,
+                              Rounding, ImDrawFlags_None, 1.0f);
           }
 
           X += BlockSize + Spacing;
