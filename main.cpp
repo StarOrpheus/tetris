@@ -65,6 +65,7 @@ int main(int, char **) {
   // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+
   // only glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // 3.0+ only
 #endif
+  glfwWindowHint(GLFW_REFRESH_RATE, 60);
 
   // Create window with graphics context
   GLFWwindow *Window = glfwCreateWindow(640, 480, "Tetris", NULL, NULL);

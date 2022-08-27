@@ -174,11 +174,29 @@ CellColor GameScene::posColor(GameScene::Position P) {
   return CellColor::EmptyCell;
 }
 
+constexpr static unsigned framesPerGridcellForLevel(unsigned Lvl) {
+  if (Lvl == 0) return 48;
+  if (Lvl == 1) return 43;
+  if (Lvl == 2) return 38;
+  if (Lvl == 3) return 33;
+  if (Lvl == 4) return 28;
+  if (Lvl == 5) return 23;
+  if (Lvl == 6) return 18;
+  if (Lvl == 7) return 13;
+  if (Lvl == 8) return 8;
+  if (Lvl == 9) return 6;
+  if (Lvl >= 10 && Lvl <= 12) return 5;
+  if (Lvl >= 13 && Lvl <= 15) return 4;
+  if (Lvl >= 16 && Lvl <= 18) return 3;
+  if (Lvl >= 19 && Lvl <= 28) return 2;
+  return 1;
+}
+
 void GameScene::draw() {
   Frame++;
 
   // TODO: level-dependent speed
-  if (Frame % 30 == 0) {
+  if (Frame % framesPerGridcellForLevel(Level) == 0) {
     auto Old = CurrentFlyingPos;
     CurrentFlyingPos += W; // ++x
     if (collide(CurrentFlyingPos)) {
@@ -224,6 +242,8 @@ void GameScene::draw() {
         else {
           assert(false && "Somehow more than 4 full lines detected!!");
         }
+
+        maybeLevelUp();
       }
 
       updateFlying();
