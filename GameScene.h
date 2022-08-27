@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <functional>
+#include <vector>
+#include <array>
 
 enum class CellColor : uint8_t {
   EmptyCell,
