@@ -9,7 +9,7 @@
 
 namespace {
 
-CellColor matchColor(TetrominoType T) {
+constexpr CellColor matchColor(TetrominoType T) noexcept {
   switch (T) {
   case TetrominoType::I:
     return CellColor::IColor;
@@ -30,8 +30,8 @@ CellColor matchColor(TetrominoType T) {
   return CellColor::EmptyCell;
 }
 
-std::array<std::pair<unsigned, unsigned>, 4>
-getTetrominoCells(TetrominoType T, unsigned Rotations) {
+constexpr std::array<std::pair<unsigned, unsigned>, 4>
+getTetrominoCells(TetrominoType T, unsigned Rotations) noexcept {
   Rotations %= 4;
   switch (T) {
   case TetrominoType::I:
@@ -106,7 +106,7 @@ std::mt19937 &getRandomDevice() {
   return D;
 }
 
-ImColor getColor(CellColor C) {
+constexpr ImColor getColor(CellColor C) noexcept {
   switch (C) {
   case CellColor::EmptyCell:
     return {255, 255, 255};
@@ -128,6 +128,39 @@ ImColor getColor(CellColor C) {
   assert(false && "Unknown cell color");
   return {0, 0, 0};
 }
+
+constexpr unsigned framesPerGridcellForLevel(unsigned Lvl) noexcept {
+  if (Lvl == 0)
+    return 48;
+  if (Lvl == 1)
+    return 43;
+  if (Lvl == 2)
+    return 38;
+  if (Lvl == 3)
+    return 33;
+  if (Lvl == 4)
+    return 28;
+  if (Lvl == 5)
+    return 23;
+  if (Lvl == 6)
+    return 18;
+  if (Lvl == 7)
+    return 13;
+  if (Lvl == 8)
+    return 8;
+  if (Lvl == 9)
+    return 6;
+  if (Lvl >= 10 && Lvl <= 12)
+    return 5;
+  if (Lvl >= 13 && Lvl <= 15)
+    return 4;
+  if (Lvl >= 16 && Lvl <= 18)
+    return 3;
+  if (Lvl >= 19 && Lvl <= 28)
+    return 2;
+  return 1;
+}
+
 } // namespace
 
 GameScene::GameScene(std::function<void(unsigned)> OnGameOver)
@@ -135,7 +168,7 @@ GameScene::GameScene(std::function<void(unsigned)> OnGameOver)
   updateFlying();
 }
 
-void GameScene::updateFlying() {
+void GameScene::updateFlying() noexcept {
   std::uniform_int_distribution TypeDistribution(
       static_cast<unsigned>(TetrominoType::I),
       static_cast<unsigned>(TetrominoType::Z));
@@ -147,21 +180,21 @@ void GameScene::updateFlying() {
   CurrentFlyingPos = fromCartesian(0, W / 2 - 1);
 }
 
-GameScene::Position GameScene::fromCartesian(unsigned int I,
-                                             unsigned int J) const {
+constexpr GameScene::Position
+GameScene::fromCartesian(unsigned int I, unsigned int J) const noexcept {
   auto Result = I * W + J;
   assert(Result < W * H);
   return Result;
 }
 
-std::pair<unsigned, unsigned>
-GameScene::toCartesian(GameScene::Position P) const {
+constexpr std::pair<unsigned, unsigned>
+GameScene::toCartesian(GameScene::Position P) const noexcept {
   auto I = P / W;
   auto J = P % W;
   return {I, J};
 }
 
-CellColor GameScene::posColor(GameScene::Position P) {
+constexpr CellColor GameScene::posColor(GameScene::Position P) const noexcept {
   if (Cells[P] != CellColor::EmptyCell)
     return Cells[P];
   auto [X, Y] = toCartesian(P);
@@ -172,24 +205,6 @@ CellColor GameScene::posColor(GameScene::Position P) {
       return matchColor(CurrentFlyingType);
   }
   return CellColor::EmptyCell;
-}
-
-constexpr static unsigned framesPerGridcellForLevel(unsigned Lvl) {
-  if (Lvl == 0) return 48;
-  if (Lvl == 1) return 43;
-  if (Lvl == 2) return 38;
-  if (Lvl == 3) return 33;
-  if (Lvl == 4) return 28;
-  if (Lvl == 5) return 23;
-  if (Lvl == 6) return 18;
-  if (Lvl == 7) return 13;
-  if (Lvl == 8) return 8;
-  if (Lvl == 9) return 6;
-  if (Lvl >= 10 && Lvl <= 12) return 5;
-  if (Lvl >= 13 && Lvl <= 15) return 4;
-  if (Lvl >= 16 && Lvl <= 18) return 3;
-  if (Lvl >= 19 && Lvl <= 28) return 2;
-  return 1;
 }
 
 void GameScene::draw() {
@@ -371,7 +386,7 @@ void GameScene::onKey(int Key, int Action) {
   assert(!collide(CurrentFlyingPos) && "Pressed key cause collision");
 }
 
-bool GameScene::collide(unsigned FlyingPos) const {
+constexpr bool GameScene::collide(unsigned FlyingPos) const noexcept {
   auto [FlyingX, FlyingY] = toCartesian(FlyingPos);
   for (auto &&[dx, dy] :
        getTetrominoCells(CurrentFlyingType, CurrentFlyingTurns)) {
@@ -384,19 +399,19 @@ bool GameScene::collide(unsigned FlyingPos) const {
   return false;
 }
 
-void GameScene::maybeLevelUp() {
+constexpr void GameScene::maybeLevelUp() noexcept {
   if (FullLinesOnCurLevel > linesToLevelUp()) {
     Level++;
     FullLinesOnCurLevel = 0;
   }
 }
 
-unsigned GameScene::linesToLevelUp() const {
+constexpr unsigned GameScene::linesToLevelUp() const noexcept {
   return std::min(StartLevel * 10 + 10,
                   unsigned(std::max(100, int(StartLevel) * 10 - 50)));
 }
 
-GameScene::Position GameScene::hardDropPos() const {
+constexpr GameScene::Position GameScene::hardDropPos() const noexcept {
   auto FlyingPos = CurrentFlyingPos;
   assert(!collide(FlyingPos));
   while (true) {

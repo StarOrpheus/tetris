@@ -45,27 +45,30 @@ struct GameScene {
 
   using Position = unsigned;
 
-  GameScene(std::function<void(unsigned)> OnGameOver);
+  explicit GameScene(std::function<void(unsigned)> OnGameOver);
 
-  void updateFlying();
+  void updateFlying() noexcept;
 
-  Position fromCartesian(unsigned I, unsigned J) const;
+  [[nodiscard]] constexpr Position fromCartesian(unsigned I,
+                                                 unsigned J) const noexcept;
 
-  std::pair<unsigned, unsigned> toCartesian(Position P) const;
+  [[nodiscard]] constexpr std::pair<unsigned, unsigned>
+  toCartesian(Position P) const noexcept;
 
-  CellColor posColor(Position P);
+  [[nodiscard]] constexpr CellColor posColor(Position P) const noexcept;
 
   void draw();
 
   void onKey(int Key, int Action);
 
-  bool collide(unsigned FlyingPos) const;
+  [[nodiscard]] constexpr bool collide(unsigned FlyingPos) const noexcept;
 
-  Position hardDropPos() const;
+  [[nodiscard]] constexpr Position hardDropPos() const noexcept;
 
-  void maybeLevelUp();
-  unsigned linesToLevelUp() const;
+  constexpr void maybeLevelUp() noexcept;
+  [[nodiscard]] constexpr unsigned linesToLevelUp() const noexcept;
 
+private:
   unsigned Level = StartLevel;
   std::vector<CellColor> Cells; //!< Current flying one is not included!
   TetrominoType CurrentFlyingType;

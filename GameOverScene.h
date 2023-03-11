@@ -2,12 +2,13 @@
 
 struct GameOverScene {
 
-  constexpr explicit GameOverScene(unsigned FinalScore)
+  constexpr explicit GameOverScene(unsigned FinalScore) noexcept
       : FinalScore(FinalScore) {}
 
-  void draw();
+  void draw() const;
 
-  void onKey(int Key, int Action) {}
+  constexpr void onKey(int Key, int Action) noexcept {}
 
+private:
   unsigned FinalScore;
 };
