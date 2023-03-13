@@ -11,6 +11,8 @@ add_executable(main
         GameScene.cpp GameScene.h
         GameOverScene.cpp GameOverScene.h)
 
+target_compile_options(main PRIVATE -fno-rtti -fno-exceptions)
+
 target_link_libraries(main
         PRIVATE
         imgui::imgui

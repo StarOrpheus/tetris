@@ -38,7 +38,7 @@ void keyCallback(GLFWwindow *W, int Key, int Scancode, int Action, int Mods) {
 }
 } // namespace
 
-int main(int, char **) try {
+int main(int, char **) {
   glfwSetErrorCallback(glfwErrorCallback);
   if (!glfwInit())
     return 1;
@@ -168,7 +168,4 @@ int main(int, char **) try {
 
   glfwDestroyWindow(Window);
   glfwTerminate();
-} catch (std::exception const &E) {
-  fmt::print("Exception occurred: {}\n", E.what());
-  return -1;
 }
