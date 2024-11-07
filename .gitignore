@@ -1,2 +1,3 @@
 _build_*
 .idea*
+cmake-build-*
