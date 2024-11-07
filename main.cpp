@@ -20,6 +20,13 @@
 
 namespace {
 
+/**
+ * Retrieves the current scene, which can either be a GameOverScene or a
+ * GameScene. The scene instance is maintained as a static local variant.
+ *
+ * @return std::variant<GameOverScene, GameScene>& A reference to the current
+ * scene variant.
+ */
 auto &getCurrentScene() {
   static std::variant<GameOverScene, GameScene> CurrentScene =
       GameScene{[&](unsigned FinalScore) {
