@@ -19,8 +19,15 @@
 #endif
 
 namespace {
-
-auto &getCurrentScene() {
+  /**
+   * Returns a reference to the current scene, which can be either a GameScene
+   * or a GameOverScene. Initially, it starts as a GameScene, and it transitions
+   * to a GameOverScene when a specific event occurs, such as achieving a final score.
+   *
+   * @return A reference to the current scene, represented as a variant of
+   *         GameOverScene and GameScene.
+   */
+  auto &getCurrentScene() {
   static std::variant<GameOverScene, GameScene> CurrentScene =
       GameScene{[&](unsigned FinalScore) {
         CurrentScene.emplace<GameOverScene>(FinalScore);
