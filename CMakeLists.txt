@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(imgui CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 
+# Enable testing
+enable_testing()
+
 add_executable(main
         main.cpp
         GameScene.cpp GameScene.h
@@ -18,3 +21,6 @@ target_link_libraries(main
         imgui::imgui
         fmt::fmt
 )
+
+# Add tests subdirectory
+add_subdirectory(tests)
